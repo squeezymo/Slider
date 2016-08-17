@@ -6,11 +6,13 @@ import android.content.res.TypedArray;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -113,7 +115,13 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
                 ContextCompat.getDrawable(context, backgroundActiveResId)
         });
 
-        background.setBackground(backgroundTransition);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            //noinspection deprecation
+            background.setBackgroundDrawable(backgroundTransition);
+        } else {
+            background.setBackground(backgroundTransition);
+        }
+
         state = STATE_STILL;
     }
 

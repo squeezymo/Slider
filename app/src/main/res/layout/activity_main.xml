@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.squeezymo.slider.Slider
+        android:id="@+id/slider"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        app:sld_segmentsX="3">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/sliding_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="2dp"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true" />
+    </com.squeezymo.slider.Slider>
+</FrameLayout>

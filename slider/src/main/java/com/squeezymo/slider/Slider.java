@@ -12,7 +12,6 @@ import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,9 +25,9 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     private final static int STATE_STILL = 0;
     private final static int STATE_ACTIVE = 1;
 
-    private final static int DIR_NONE = 0;
-    private final static int DIR_LEFT = 1;
-    private final static int DIR_RIGHT = 2;
+    public final static int DIR_NONE = 0;
+    public final static int DIR_LEFT = 1;
+    public final static int DIR_RIGHT = 2;
 
     @IntDef({STATE_STILL, STATE_ACTIVE}) public @interface State {}
 
@@ -40,7 +39,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     private final Runnable activeStateChecker = new Runnable() {
         @Override
         public void run() {
-            if (slidingFabTouched) {
+            if (slidingViewTouched) {
                 setState(STATE_ACTIVE);
             }
         }
@@ -52,7 +51,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     private @Nullable OnClickListener onClickListener;
     private @Nullable OnPositionChangeListener onPositionChangeListener;
 
-    private boolean slidingFabTouched;
+    private boolean slidingViewTouched;
     private @State int state;
 
     private float sliderBoundLeft;
@@ -208,7 +207,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
 
         switch (MotionEventCompat.getActionMasked(event)) {
             case MotionEvent.ACTION_DOWN: {
-                slidingFabTouched = true;
+                slidingViewTouched = true;
                 touchDownPosition.set(touchCurrentPosition);
                 correction.set(slidingView.getX() - touchCurrentPosition.x, slidingView.getY() - touchCurrentPosition.y);
 
@@ -259,13 +258,13 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
             }
 
             case MotionEvent.ACTION_UP: {
-                slidingFabTouched = false;
+                slidingViewTouched = false;
 
                 if (onClickListener != null && state != STATE_ACTIVE && !hasExceededDistThreshold()) {
                     onClickListener.onClick(this);
                 }
 
-                revertSlidingFabPosition(true);
+                revertSlidingViewPosition(true);
             }
         }
 
@@ -280,7 +279,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
         return false;
     }
 
-    private void revertSlidingFabPosition(final boolean animate) {
+    private void revertSlidingViewPosition(final boolean animate) {
         slidingView
                 .animate()
                 .x(sliderPosition.x)

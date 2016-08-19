@@ -49,7 +49,8 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     private final View background;
 
     private @Nullable OnClickListener onClickListener;
-    private @Nullable OnPositionChangeListener onPositionChangeListener;
+    private @Nullable OnDiscretePositionChangeListener onDiscretePositionChangeListener;
+    private @Nullable OnRelativePositionChangeListener onRelativePositionChangeListener;
 
     private boolean slidingViewTouched;
     private @State int state;
@@ -77,10 +78,18 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
         void onClick(final Slider slider);
     }
 
-    public interface OnPositionChangeListener {
+    public interface OnDiscretePositionChangeListener {
         void onActivated(final Slider slider);
 
         void onPositionChanged(final Slider slider, final @Direction int direction, final int position);
+
+        void onReleased(final Slider slider);
+    }
+
+    public interface OnRelativePositionChangeListener {
+        void onActivated(final Slider slider);
+
+        void onPositionChanged(final Slider slider, final @Direction int direction, final float ratio);
 
         void onReleased(final Slider slider);
     }
@@ -177,12 +186,21 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     }
 
     @Nullable
-    public OnPositionChangeListener getOnPositionChangeListener() {
-        return onPositionChangeListener;
+    public OnDiscretePositionChangeListener getOnDiscretePositionChangeListener() {
+        return onDiscretePositionChangeListener;
     }
 
-    public void setOnPositionChangeListener(@Nullable OnPositionChangeListener onPositionChangeListener) {
-        this.onPositionChangeListener = onPositionChangeListener;
+    public void setOnDiscretePositionChangeListener(@Nullable OnDiscretePositionChangeListener onDiscretePositionChangeListener) {
+        this.onDiscretePositionChangeListener = onDiscretePositionChangeListener;
+    }
+
+    @Nullable
+    public OnRelativePositionChangeListener getOnRelativePositionChangeListener() {
+        return onRelativePositionChangeListener;
+    }
+
+    public void setOnRelativePositionChangeListener(@Nullable OnRelativePositionChangeListener onRelativePositionChangeListener) {
+        this.onRelativePositionChangeListener = onRelativePositionChangeListener;
     }
 
     public int getActivationTime() {
@@ -242,9 +260,15 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
 
                 final int newCurrentSegmentX = (int) Math.ceil(ratioX/segmentRatioX);
 
-                if (currentSegmentX != newCurrentSegmentX && state == STATE_ACTIVE && onPositionChangeListener != null) {
-                    currentSegmentX = newCurrentSegmentX;
-                    onPositionChangeListener.onPositionChanged(this, direction, currentSegmentX);
+                if (state == STATE_ACTIVE) {
+                    if (currentSegmentX != newCurrentSegmentX && onDiscretePositionChangeListener != null) {
+                        currentSegmentX = newCurrentSegmentX;
+                        onDiscretePositionChangeListener.onPositionChanged(this, direction, currentSegmentX);
+                    }
+
+                    if (onRelativePositionChangeListener != null) {
+                        onRelativePositionChangeListener.onPositionChanged(this, direction, ratioX);
+                    }
                 }
 
                 slidingView.setX(newX);
@@ -305,22 +329,30 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
 
     }
 
-    private synchronized void setState(final @State int state) {
+    private void setState(final @State int state) {
         if (this.state != state) {
             if (state == STATE_STILL) {
                 currentSegmentX = 0;
                 backgroundTransition.reverseTransition(BACKGROUND_TRANSITION_DURATION);
 
-                if (onPositionChangeListener != null) {
-                    onPositionChangeListener.onReleased(this);
+                if (onDiscretePositionChangeListener != null) {
+                    onDiscretePositionChangeListener.onReleased(this);
+                }
+
+                if (onRelativePositionChangeListener != null) {
+                    onRelativePositionChangeListener.onReleased(this);
                 }
             }
             else {
                 background.setAlpha(alphaMin);
                 backgroundTransition.startTransition(BACKGROUND_TRANSITION_DURATION);
 
-                if (onPositionChangeListener != null) {
-                    onPositionChangeListener.onActivated(this);
+                if (onDiscretePositionChangeListener != null) {
+                    onDiscretePositionChangeListener.onActivated(this);
+                }
+
+                if (onRelativePositionChangeListener != null) {
+                    onRelativePositionChangeListener.onActivated(this);
                 }
             }
 

@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.squeezymo.slider.Slider;
 
@@ -37,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
                     android.util.Log.d("333444", "CLICKED");
                 }
             });
-            slider.setOnPositionChangeListener(new Slider.OnPositionChangeListener() {
+            slider.setOnDiscretePositionChangeListener(new Slider.OnDiscretePositionChangeListener() {
                 @Override
                 public void onActivated(final Slider slider) {
                     android.util.Log.d("333444", "ACTIVATED");

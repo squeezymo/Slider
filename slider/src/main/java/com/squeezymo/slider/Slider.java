@@ -473,6 +473,8 @@ public class Slider extends FrameLayout implements View.OnTouchListener, Runnabl
         if (this.state != state) {
             if (state == STATE_STILL) {
                 currentSegmentX = 0;
+                currentSegmentY = 0;
+
                 backgroundTransition.reverseTransition(BACKGROUND_TRANSITION_DURATION);
 
                 if (onDragListener != null) {

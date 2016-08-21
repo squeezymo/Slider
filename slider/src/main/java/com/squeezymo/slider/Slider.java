@@ -12,6 +12,8 @@ import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -446,26 +448,23 @@ public class Slider extends FrameLayout implements View.OnTouchListener, Runnabl
     }
 
     private void revertSlidingViewPosition(final boolean animate) {
-        slidingView
-                .animate()
+        ViewCompat
+                .animate(slidingView)
                 .x(sliderPosition.x)
                 .y(sliderPosition.y)
                 .setDuration(animate ? 200 : 0)
                 .setInterpolator(new DecelerateInterpolator())
-                .setListener(new Animator.AnimatorListener() {
+                .setListener(new ViewPropertyAnimatorListener() {
                     @Override
-                    public void onAnimationStart(Animator animator) {}
+                    public void onAnimationStart(View view) {}
 
                     @Override
-                    public void onAnimationEnd(Animator animator) {
+                    public void onAnimationEnd(View view) {
                         setState(STATE_STILL);
                     }
 
                     @Override
-                    public void onAnimationCancel(Animator animator) {}
-
-                    @Override
-                    public void onAnimationRepeat(Animator animator) {}
+                    public void onAnimationCancel(View view) {}
                 })
                 .start();
     }

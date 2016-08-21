@@ -1,10 +1,10 @@
 package com.squeezymo.slider_demo;
 
 import android.graphics.Color;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.github.clans.fab.FloatingActionButton;
 import com.squeezymo.slider.Slider;
 
 public class MainActivity extends AppCompatActivity {
@@ -14,9 +14,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final FABSlider fabSlider = new FABSlider(
-                (Slider) findViewById(R.id.slider),
-                (FloatingActionButton) findViewById(R.id.sliding_fab)
+        final FABSlider fabSlideHorizontal = new FABSlider(
+                (Slider) findViewById(R.id.slider_horizontal),
+                (FloatingActionButton) findViewById(R.id.sliding_fab_horizontal)
+        );
+
+        final FABSlider fabSlideVertical = new FABSlider(
+                (Slider) findViewById(R.id.slider_vertical),
+                (FloatingActionButton) findViewById(R.id.sliding_fab_vertical)
         );
     }
 
@@ -28,30 +33,29 @@ public class MainActivity extends AppCompatActivity {
             this.slider = slider;
             this.fab = fab;
 
-            fab.setBackgroundColor(Color.RED);
-
             slider.setOnClickListener(new Slider.OnClickListener() {
                 @Override
                 public void onClick(Slider slider) {
                     android.util.Log.d("333444", "CLICKED");
                 }
             });
-            slider.setOnDiscretePositionChangeListener(new Slider.OnDiscretePositionChangeListener() {
+            slider.setOnDragListener(new Slider.OnDragListener() {
                 @Override
-                public void onActivated(final Slider slider) {
+                public void onDragStarted(Slider slider) {
                     android.util.Log.d("333444", "ACTIVATED");
-                    fab.setBackgroundColor(Color.GREEN);
+                    // fab.setBackgroundColor(Color.GREEN);
                 }
 
                 @Override
-                public void onPositionChanged(final Slider slider, final @Slider.Direction int direction, final int position) {
-                    android.util.Log.d("333444", "POSITION CHANGED: " + direction + ", segment " + position);
-                }
-
-                @Override
-                public void onReleased(final Slider slider) {
+                public void onDragFinished(Slider slider) {
                     android.util.Log.d("333444", "RELEASED");
-                    fab.setBackgroundColor(Color.RED);
+                    //  fab.setBackgroundColor(Color.RED);
+                }
+            });
+            slider.setOnDiscretePositionChange1dListener(new Slider.OnDiscretePositionChange1DListener() {
+                @Override
+                public void onPositionChanged(Slider slider, @Slider.Direction int direction, int position) {
+                    android.util.Log.d("333444", "POSITION CHANGED: " + direction + ", " + position);
                 }
             });
         }

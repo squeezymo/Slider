@@ -1,23 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <com.squeezymo.slider.Slider
-        android:id="@+id/slider"
-        android:layout_width="100dp"
-        android:layout_height="20dp"
-        android:layout_gravity="center"
+        android:id="@+id/slider_horizontal"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_margin="16dp"
+        android:layout_gravity="center_horizontal|bottom"
+        app:sld_type="horizontal"
         app:sld_segmentsX="3">
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/sliding_fab"
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/sliding_fab_horizontal"
+            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:padding="2dp"
-            android:scaleType="fitCenter"
-            android:adjustViewBounds="true" />
+            app:fab_size="mini" />
     </com.squeezymo.slider.Slider>
+
+    <com.squeezymo.slider.Slider
+        android:id="@+id/slider_vertical"
+        android:layout_width="40dp"
+        android:layout_height="200dp"
+        android:layout_margin="16dp"
+        android:layout_gravity="center_vertical|end"
+        app:sld_type="vertical"
+        app:sld_segmentsY="3">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/sliding_fab_vertical"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            app:fab_size="mini" />
+    </com.squeezymo.slider.Slider>
+
 </FrameLayout>

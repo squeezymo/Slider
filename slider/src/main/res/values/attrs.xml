@@ -2,7 +2,7 @@
 <resources>
     <declare-styleable name="Slider">
         <attr name="sld_backgroundStill" format="reference" />
-        <attr name="sld_backgroundActive" format="reference" />
+        <attr name="sld_backgroundDragged" format="reference" />
         <attr name="sld_segmentsX" format="integer" />
         <attr name="sld_alphaFrom" format="float" />
         <attr name="sld_alphaTo" format="float" />

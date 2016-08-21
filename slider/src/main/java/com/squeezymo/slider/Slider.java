@@ -23,24 +23,24 @@ import android.widget.FrameLayout;
 
 public class Slider extends FrameLayout implements View.OnTouchListener {
     private final static int STATE_STILL = 0;
-    private final static int STATE_ACTIVE = 1;
+    private final static int STATE_DRAG_IN_PROGRESS = 1;
 
     public final static int DIR_NONE = 0;
     public final static int DIR_LEFT = 1;
     public final static int DIR_RIGHT = 2;
 
-    @IntDef({STATE_STILL, STATE_ACTIVE}) public @interface State {}
+    @IntDef({STATE_STILL, STATE_DRAG_IN_PROGRESS}) public @interface State {}
 
     @IntDef({DIR_NONE, DIR_LEFT, DIR_RIGHT}) public @interface Direction {}
 
     private final static int BACKGROUND_TRANSITION_DURATION = 300;
 
     private final int MAX_CLICK_DISTANCE;
-    private final Runnable activeStateChecker = new Runnable() {
+    private final Runnable dragChecker = new Runnable() {
         @Override
         public void run() {
             if (slidingViewTouched) {
-                setState(STATE_ACTIVE);
+                setState(STATE_DRAG_IN_PROGRESS);
             }
         }
     };
@@ -49,6 +49,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     private final View background;
 
     private @Nullable OnClickListener onClickListener;
+    private @Nullable OnDragListener onDragListener;
     private @Nullable OnDiscretePositionChangeListener onDiscretePositionChangeListener;
     private @Nullable OnRelativePositionChangeListener onRelativePositionChangeListener;
 
@@ -68,8 +69,8 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     private TransitionDrawable backgroundTransition;
 
     private @DrawableRes int backgroundStillResId = android.R.color.transparent;
-    private @DrawableRes int backgroundActiveResId = R.drawable.background_active_default;
-    private int activationTime = 300;
+    private @DrawableRes int backgroundDraggedResId = R.drawable.background_dragged_default;
+    private int dragActivationTime = 300;
     private float segmentRatioX = 1;
     private float alphaMin = 0.2f;
     private float alphaMax = 1f;
@@ -78,20 +79,18 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
         void onClick(final Slider slider);
     }
 
+    public interface OnDragListener {
+        void onDragStarted(final Slider slider);
+
+        void onDragFinished(final Slider slider);
+    }
+
     public interface OnDiscretePositionChangeListener {
-        void onActivated(final Slider slider);
-
         void onPositionChanged(final Slider slider, final @Direction int direction, final int position);
-
-        void onReleased(final Slider slider);
     }
 
     public interface OnRelativePositionChangeListener {
-        void onActivated(final Slider slider);
-
         void onPositionChanged(final Slider slider, final @Direction int direction, final float ratio);
-
-        void onReleased(final Slider slider);
     }
 
     public Slider(Context context) {
@@ -120,7 +119,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
 
         backgroundTransition = new TransitionDrawable(new Drawable[] {
                 ContextCompat.getDrawable(context, backgroundStillResId),
-                ContextCompat.getDrawable(context, backgroundActiveResId)
+                ContextCompat.getDrawable(context, backgroundDraggedResId)
         });
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
@@ -164,7 +163,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
             array = context.obtainStyledAttributes(attrs, R.styleable.Slider);
 
             backgroundStillResId = array.getResourceId(R.styleable.Slider_sld_backgroundStill, backgroundStillResId);
-            backgroundActiveResId = array.getResourceId(R.styleable.Slider_sld_backgroundActive, backgroundActiveResId);
+            backgroundDraggedResId = array.getResourceId(R.styleable.Slider_sld_backgroundDragged, backgroundDraggedResId);
             segmentRatioX = 1f/array.getInt(R.styleable.Slider_sld_segmentsX, 1);
             alphaMin = array.getFloat(R.styleable.Slider_sld_alphaFrom, alphaMin);
             alphaMax = array.getFloat(R.styleable.Slider_sld_alphaTo, alphaMax);
@@ -186,6 +185,15 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     }
 
     @Nullable
+    public OnDragListener getOnDragListener() {
+        return onDragListener;
+    }
+
+    public void setOnDragListener(@Nullable OnDragListener onDragListener) {
+        this.onDragListener = onDragListener;
+    }
+
+    @Nullable
     public OnDiscretePositionChangeListener getOnDiscretePositionChangeListener() {
         return onDiscretePositionChangeListener;
     }
@@ -203,12 +211,12 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
         this.onRelativePositionChangeListener = onRelativePositionChangeListener;
     }
 
-    public int getActivationTime() {
-        return activationTime;
+    public int getDragActivationTime() {
+        return dragActivationTime;
     }
 
-    public void setActivationTime(int activationTime) {
-        this.activationTime = activationTime;
+    public void setDragActivationTime(int activationTime) {
+        this.dragActivationTime = activationTime;
     }
 
     public void setSegmentsX(int segmentsX) {
@@ -229,7 +237,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
                 touchDownPosition.set(touchCurrentPosition);
                 correction.set(slidingView.getX() - touchCurrentPosition.x, slidingView.getY() - touchCurrentPosition.y);
 
-                postDelayed(activeStateChecker, activationTime);
+                postDelayed(dragChecker, dragActivationTime);
 
                 break;
             }
@@ -260,7 +268,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
 
                 final int newCurrentSegmentX = (int) Math.ceil(ratioX/segmentRatioX);
 
-                if (state == STATE_ACTIVE) {
+                if (state == STATE_DRAG_IN_PROGRESS) {
                     if (currentSegmentX != newCurrentSegmentX && onDiscretePositionChangeListener != null) {
                         currentSegmentX = newCurrentSegmentX;
                         onDiscretePositionChangeListener.onPositionChanged(this, direction, currentSegmentX);
@@ -275,7 +283,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
                 //slidingView.requestLayout();
 
                 if (hasExceededDistThreshold()) {
-                    setState(STATE_ACTIVE);
+                    setState(STATE_DRAG_IN_PROGRESS);
                 }
 
                 break;
@@ -284,7 +292,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
             case MotionEvent.ACTION_UP: {
                 slidingViewTouched = false;
 
-                if (onClickListener != null && state != STATE_ACTIVE && !hasExceededDistThreshold()) {
+                if (onClickListener != null && state != STATE_DRAG_IN_PROGRESS && !hasExceededDistThreshold()) {
                     onClickListener.onClick(this);
                 }
 
@@ -335,24 +343,16 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
                 currentSegmentX = 0;
                 backgroundTransition.reverseTransition(BACKGROUND_TRANSITION_DURATION);
 
-                if (onDiscretePositionChangeListener != null) {
-                    onDiscretePositionChangeListener.onReleased(this);
-                }
-
-                if (onRelativePositionChangeListener != null) {
-                    onRelativePositionChangeListener.onReleased(this);
+                if (onDragListener != null) {
+                    onDragListener.onDragFinished(this);
                 }
             }
             else {
                 background.setAlpha(alphaMin);
                 backgroundTransition.startTransition(BACKGROUND_TRANSITION_DURATION);
 
-                if (onDiscretePositionChangeListener != null) {
-                    onDiscretePositionChangeListener.onActivated(this);
-                }
-
-                if (onRelativePositionChangeListener != null) {
-                    onRelativePositionChangeListener.onActivated(this);
+                if (onDragListener != null) {
+                    onDragListener.onDragStarted(this);
                 }
             }
 

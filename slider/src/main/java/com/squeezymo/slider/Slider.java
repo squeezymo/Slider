@@ -136,20 +136,25 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
+        slidingView = getChildAt(1);
+        ((LayoutParams) slidingView.getLayoutParams()).gravity = Gravity.CENTER;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
         if (getChildCount() != 2) {
             throw new IllegalStateException("1 child expected; " + (getChildCount() - 1) + " found");
         }
 
-        slidingView = getChildAt(1);
         slidingView.setOnTouchListener(this);
-        ((LayoutParams) slidingView.getLayoutParams()).gravity = Gravity.CENTER;
         slidingView.bringToFront();
 
         sliderPosition.set(slidingView.getX(), slidingView.getY());
 
         sliderBoundLeft = 0;
         sliderBoundRight = getWidth() - slidingView.getWidth();
-
     }
 
     private void initAttributes(final Context context, final @Nullable AttributeSet attrs) {

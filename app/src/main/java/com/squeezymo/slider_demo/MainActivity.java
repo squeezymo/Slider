@@ -36,22 +36,23 @@ public class MainActivity extends AppCompatActivity {
                     android.util.Log.d("333444", "CLICKED");
                 }
             });
-            slider.setOnDiscretePositionChangeListener(new Slider.OnDiscretePositionChangeListener() {
+            slider.setOnDragListener(new Slider.OnDragListener() {
                 @Override
-                public void onActivated(final Slider slider) {
+                public void onDragStarted(Slider slider) {
                     android.util.Log.d("333444", "ACTIVATED");
                     fab.setBackgroundColor(Color.GREEN);
                 }
 
                 @Override
-                public void onPositionChanged(final Slider slider, final @Slider.Direction int direction, final int position) {
-                    android.util.Log.d("333444", "POSITION CHANGED: " + direction + ", segment " + position);
-                }
-
-                @Override
-                public void onReleased(final Slider slider) {
+                public void onDragFinished(Slider slider) {
                     android.util.Log.d("333444", "RELEASED");
                     fab.setBackgroundColor(Color.RED);
+                }
+            });
+            slider.setOnDiscretePositionChangeListener(new Slider.OnDiscretePositionChangeListener() {
+                @Override
+                public void onPositionChanged(final Slider slider, final @Slider.Direction int direction, final int position) {
+                    android.util.Log.d("333444", "POSITION CHANGED: " + direction + ", segment " + position);
                 }
             });
         }

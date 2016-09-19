@@ -229,7 +229,7 @@ public class Slider extends FrameLayout implements View.OnTouchListener {
             return false;
         }
 
-        touchCurrentPosition.set(event.getRawX(), event.getY());
+        touchCurrentPosition.set(event.getRawX(), event.getRawY());
 
         switch (MotionEventCompat.getActionMasked(event)) {
             case MotionEvent.ACTION_DOWN: {
